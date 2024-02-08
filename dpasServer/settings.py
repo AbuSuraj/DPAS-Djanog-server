@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
         'rest_framework',
-        'server',
-        'authentication'
+        'authentication',
+        'server'
 ]
 
 MIDDLEWARE = [
@@ -75,11 +75,17 @@ WSGI_APPLICATION = 'dpasServer.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+AUTH_USER_MODEL = 'authentication.CustomUser'
+
+# Configure authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'your_database_name',
+        'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'abc',
         'HOST': 'localhost',  # Or your PostgreSQL host

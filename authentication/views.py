@@ -1,37 +1,25 @@
-# authentication/views.py
-
-from django.shortcuts import render
 from django.http import JsonResponse
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
+from .serializers import UserSerializer
 
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        role = request.POST.get('role')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        userId = request.POST.get('userId')
-
-        # Check if the user already exists
-        if User.objects.filter(email=email).exists():
-            return JsonResponse({'error': 'User with this email already exists'}, status=400)
-
-        # Create the user
-        user = User.objects.create_user(username=email, email=email, password=password)
-        user.name = name
-        user.role = role
-        user.userId = userId
-        user.save()
-        
-        return JsonResponse({'message': 'User registered successfully'}, status=201)
+        serializer = UserSerializer(data=request.POST)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({'message': 'User registered successfully'}, status=201)
+        return JsonResponse(serializer.errors, status=400)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        data = request.POST
+        email = data.get('email')
+        password = data.get('password')
 
         user = authenticate(username=email, password=password)
 
@@ -43,6 +31,7 @@ def login(request):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+@csrf_exempt
 def logout(request):
     if request.method == 'POST':
         logout(request)
