@@ -1,3 +1,4 @@
+# models.py
 from django.db import models
 
 class Appointment(models.Model):
@@ -10,7 +11,7 @@ class Appointment(models.Model):
     status = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.problem} - {self.doctor}"
+        return f"Appointment ID: {self.pk}"
 
 class Patient(models.Model):
     appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
@@ -20,14 +21,14 @@ class Patient(models.Model):
     patient_father_name_bangla = models.CharField(max_length=255)
     patient_mother_name_english = models.CharField(max_length=255)
     patient_mother_name_bangla = models.CharField(max_length=255)
-    present_address = models.TextField()
-    permanent_address = models.TextField()
-    mobile_number = models.CharField(max_length=15)
+    present_address = models.CharField(max_length=255)
+    permanent_address = models.CharField(max_length=255)
+    mobile_number = models.CharField(max_length=20)
     email = models.EmailField()
-    nid_or_birth_certificate_no = models.CharField(max_length=255)
+    nid_or_birth_certificate_no = models.CharField(max_length=20)
     sex = models.CharField(max_length=10)
     age = models.IntegerField()
     weight = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return self.patient_name_english
+        return f"Patient ID: {self.pk}"

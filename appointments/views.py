@@ -1,26 +1,35 @@
-from rest_framework import generics
+# views.py
+
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db import transaction
 from .models import Appointment, Patient
 from .serializers import AppointmentSerializer, PatientSerializer
 from rest_framework.permissions import AllowAny
-class AppointmentListCreateView(generics.ListCreateAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+class CreateAppointment(APIView):
     permission_classes = [AllowAny]
-    def perform_create(self, serializer):
-        patient_data = serializer.validated_data.pop('patient')
-        appointment = serializer.save()
-        Patient.objects.create(appointment=appointment, **patient_data)
+    def post(self, request, format=None):
+        appointment_data = request.data
 
-class AppointmentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
-    permission_classes = [AllowAny]
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        patient_data = request.data.pop('patient')
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        Patient.objects.filter(appointment=instance).update(**patient_data)
-        return Response(serializer.data)
+        appointment_serializer = AppointmentSerializer(data=appointment_data)
+        if appointment_serializer.is_valid():
+            # Start a transaction
+            with transaction.atomic():
+                appointment_instance = appointment_serializer.save()
+
+                # Extract patient data and set appointment instance
+                patient_data = appointment_data.copy()
+                patient_data['appointment'] = appointment_instance.id
+
+                patient_serializer = PatientSerializer(data=patient_data)
+                if patient_serializer.is_valid():
+                    patient_serializer.save()
+                    return Response(appointment_serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    # Rollback appointment creation if patient creation fails
+                    appointment_instance.delete()
+                    return Response(patient_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(appointment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # permission_classes = [AllowAny]
