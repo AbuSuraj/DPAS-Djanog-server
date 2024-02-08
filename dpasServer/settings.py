@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
         'rest_framework',
         'authentication',
-        'server'
+        'appointments'
 ]
 
 MIDDLEWARE = [
@@ -85,7 +85,7 @@ AUTHENTICATION_BACKENDS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'dpas',
         'USER': 'postgres',
         'PASSWORD': 'abc',
         'HOST': 'localhost',  # Or your PostgreSQL host

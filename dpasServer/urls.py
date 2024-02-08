@@ -23,5 +23,6 @@ router = DefaultRouter()
 urlpatterns = [
     path('', include(router.urls)),
     path('api/auth/', include('authentication.urls')),
+    path('api/appointments/', include('appointments.urls')),
 ]
 
